@@ -1,0 +1,18 @@
+{
+  "records": [
+    {
+      "player_id": 1,
+      "name": "player1",
+      "date": "01.09.2020",
+      "time": "10:10:10",
+      "result": 1000
+    },
+    {
+      "player_id": 2,
+      "name": "player2",
+      "date": "03.09.2020",
+      "time": "15:15:15",
+      "result": 500
+    }
+  ]
+}
