@@ -5,4 +5,5 @@
 - Рекорды: https://docs.google.com/drawings/d/1u13dfW25WEAE7u8wGA5KhDJTTUac5IKjZxnCuDddFAQ/edit?usp=sharing
 
 Требования к проекту:
-- https://docs.google.com/document/d/1vIH2bxTFFL71YcEZxrCKhNGUb-eGs3QCh74eypfAsUI/edit?usp=sharing
+- SRS: https://docs.google.com/document/d/1vIH2bxTFFL71YcEZxrCKhNGUb-eGs3QCh74eypfAsUI/edit?usp=sharing
+- SDS: https://docs.google.com/document/d/1z6Rzuqb_c0Hs2WqpnwfHcaXg36XCScuKh8CeChDrwZQ/edit?usp=sharing
