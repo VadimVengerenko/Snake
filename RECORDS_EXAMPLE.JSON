@@ -1,0 +1,14 @@
+{
+  "records": [
+    {
+      "player_id": 1,
+      "name": "player1",
+      "date": "01.09.2020",
+      "time": "10:10:10",
+      "result": 1000,
+      "mode": "1 player",
+      "map": "map 1",
+      "speed": "x1"
+    }
+  ]
+}
