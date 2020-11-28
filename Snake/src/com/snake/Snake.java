@@ -33,23 +33,27 @@ public class Snake {
         yCoords = new ArrayList<>();
         snakeSprites = new Image(Main.class.getResourceAsStream(settings.getCharacterPath()));
         mapSprites = new Image(Main.class.getResourceAsStream("Sprites/snake.png"));
+        //устанавливаются координаты начальных трех фрагментов змейки
         xCoords.add(startPosX);
         xCoords.add(startPosX - 16);
         xCoords.add(startPosX - 32);
         yCoords.add(startPosY);
         yCoords.add(startPosY);
         yCoords.add(startPosY);
+        //отображаются эти 3 фрагмента
         graphicsContext.drawImage(snakeSprites, 64, 0, SIZE, SIZE, xCoords.get(0), yCoords.get(0), SIZE, SIZE);
         graphicsContext.drawImage(snakeSprites, 16, 0, SIZE, SIZE, xCoords.get(1), yCoords.get(1), SIZE, SIZE);
         graphicsContext.drawImage(snakeSprites, 64, 32, SIZE, SIZE, xCoords.get(2), yCoords.get(2), SIZE, SIZE);
     }
 
     public void move(Snake player2Snake) {
+        //змея двигается на один шаг в соответствии с направлением
+        //предыдущие координаты головы
         int prevX = xCoords.get(0);
         int prevY = yCoords.get(0);
         int prevXBuffer;
         int prevYBuffer;
-        if (!direction.isEmpty()) {
+        if (!direction.isEmpty()) { //если у змейки задано направление (уже было произведено первое нажатие на клавиши изменения направления)
             if (direction.equals("up")) {
                 yCoords.set(0, yCoords.get(0) - 16);
             }
@@ -66,7 +70,8 @@ public class Snake {
                 collision = true;
                 return;
             }
-            if (player2Snake != null) {
+            if (player2Snake != null) { //если создан второй игрок
+                //проверяется совпадение координат головы одной змейки и фрагментов другой
                 for (int fragmentNumber = 0; fragmentNumber < player2Snake.getSnakeSize(); fragmentNumber++) {
                     if (xCoords.get(0) == player2Snake.getX(fragmentNumber) && yCoords.get(0) == player2Snake.getY(fragmentNumber)) {
                         collision = true;
@@ -75,6 +80,7 @@ public class Snake {
                 }
             }
             for (int fragmentNumber = 1; fragmentNumber < snakeSize; fragmentNumber++) {
+                //проверяется, не укусила ли змея сама себя
                 if ((direction.equals("up") && yCoords.get(fragmentNumber).equals(yCoords.get(0)) && xCoords.get(0).equals(xCoords.get(fragmentNumber))) ||
                         (direction.equals("down") && yCoords.get(fragmentNumber).equals(yCoords.get(0)) && xCoords.get(0).equals(xCoords.get(fragmentNumber))) ||
                         (direction.equals("right") && xCoords.get(fragmentNumber).equals(xCoords.get(0)) && yCoords.get(0).equals(yCoords.get(fragmentNumber))) ||
@@ -83,6 +89,7 @@ public class Snake {
                     return;
                 }
             }
+            //отображение головы змеи на новом месте
             if (direction.equals("up")) {
                 graphicsContext.drawImage(mapSprites, 33, 33, SIZE, SIZE, xCoords.get(0), yCoords.get(0), SIZE, SIZE);
                 graphicsContext.drawImage(snakeSprites, 48, 0, SIZE, SIZE, xCoords.get(0), yCoords.get(0), SIZE, SIZE);
@@ -99,6 +106,7 @@ public class Snake {
                 graphicsContext.drawImage(mapSprites, 33, 33, SIZE, SIZE, xCoords.get(0), yCoords.get(0), SIZE, SIZE);
                 graphicsContext.drawImage(snakeSprites, 48, 16, SIZE, SIZE, xCoords.get(0), yCoords.get(0), SIZE, SIZE);
             }
+            //предыдущие фрагменты отображаются на месте следующих
             for (int fragmentNumber = 1; fragmentNumber < snakeSize; fragmentNumber++) {
                 prevXBuffer = xCoords.get(fragmentNumber);
                 prevYBuffer = yCoords.get(fragmentNumber);
@@ -114,15 +122,16 @@ public class Snake {
     }
 
     public void eat(Fruit fruit, Bonus bonus) {
-        if (fruit != null) {
-            fruitsEaten++;
-            fruit.setGenerate(true);
+        if (fruit != null) { //змея съела фрукт
+            fruitsEaten++; //кол-во очков увеличивается на 1
+            fruit.setGenerate(true); //разрешается генерировать координаты фрукта заново
+            //запоминаются текущие координаты головы
             prevTailX = xCoords.get(0);
             prevTailY = yCoords.get(0);
             eat = true;
         }
-        if (bonus != null) {
-            fruitsEaten += 2;
+        if (bonus != null) { //змея съела бонус
+            fruitsEaten += 2; //кол-во очков увеличивается на 2
             bonus.resetBonusTimeout();
             prevTailX = xCoords.get(0);
             prevTailY = yCoords.get(0);
@@ -131,6 +140,7 @@ public class Snake {
     }
 
     public void grow() {
+        //змея вырастает на 1 фрагмент
         snakeSize++;
         xCoords.add(prevTailX);
         yCoords.add(prevTailY);
@@ -138,8 +148,10 @@ public class Snake {
     }
 
     public void displaySnake() {
+        //фрагменты туловища змеи отображаются на игровом поле
         for (int fragmentNumber = 1; fragmentNumber < snakeSize; fragmentNumber++) {
-            graphicsContext.drawImage(mapSprites, 33, 33, SIZE, SIZE, xCoords.get(fragmentNumber), yCoords.get(fragmentNumber), SIZE, SIZE);
+            graphicsContext.drawImage(mapSprites, 33, 33, SIZE, SIZE, xCoords.get(fragmentNumber), yCoords.get(fragmentNumber), SIZE, SIZE); //закрашивается предыдущий фрагмент туловища
+            //нижестоящие условия определяют, какой спрайт отобразить в позиции текущего фрагмента
             if (fragmentNumber == snakeSize - 1 && yCoords.get(fragmentNumber) > yCoords.get(fragmentNumber - 1)) {
                 graphicsContext.drawImage(snakeSprites, 48, 32, SIZE, SIZE, xCoords.get(fragmentNumber), yCoords.get(fragmentNumber), SIZE, SIZE);
             }

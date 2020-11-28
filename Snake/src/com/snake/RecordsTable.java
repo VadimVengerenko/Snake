@@ -23,6 +23,7 @@ public class RecordsTable {
                  String mode,
                  String map,
                  String speed) {
+        //класс-шаблон для таблицы рекордов
         this.fieldNumber = new SimpleIntegerProperty(fieldNumber);
         this.id = new SimpleIntegerProperty(id);
         this.name = new SimpleStringProperty(name);

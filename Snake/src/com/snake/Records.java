@@ -25,7 +25,6 @@ public class Records {
     private Settings settings;
     private TextField nameField;
     private File recordsFile;
-    private FileWriter fileWriter;
     private int result;
     private Button returnToMenuButton;
     private Menu menu;
@@ -33,7 +32,7 @@ public class Records {
     public Records(Menu menu, Settings settings, Group root, int result) {
         this.menu = menu;
         this.result = result;
-        recordsFile = new File("src/com/snake/records.json");
+        recordsFile = new File("src/com/snake/records.json"); //открывается файл с рекордами
         this.settings = settings;
         nameField = new TextField();
         nameField.setTranslateX(566);
@@ -57,6 +56,7 @@ public class Records {
         readFile();
         ArrayList<RecordsTable> values = new ArrayList<>();
         if (!jsonArray.isEmpty()) {
+            //производится вывод рекордов в таблицу в соответствии с классом-шаблоном для вывода RecordsTable
             for (int index = 0; index < jsonArray.length(); index++) {
                 values.add(new RecordsTable(
                         index + 1,
@@ -111,15 +111,15 @@ public class Records {
         menu.getStage().setScene(recordsScene);
     }
 
-    public void setPlayerName(String playerName) {
-        readFile();
-        findPlayerName(playerName);
+    public boolean setPlayerName(String playerName) {
+        readFile(); //чтение файла
+        return findPlayerName(playerName);
     }
 
     public void readFile() {
         StringBuilder jsonFileInfo = new StringBuilder();
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(recordsFile.getAbsoluteFile()));
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(recordsFile.getAbsoluteFile())); //рекорды считываются
             try {
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
@@ -134,37 +134,37 @@ public class Records {
         jsonArray = new JSONArray();
         if (jsonFileInfo.length() != 0) {
             JSONObject jsonObject = new JSONObject(jsonFileInfo.toString());
-            jsonArray = jsonObject.getJSONArray("records");
+            jsonArray = jsonObject.getJSONArray("records"); //рекорды заносятся в массив в формате JSON
         }
     }
 
-    public void findPlayerName(String playerName) {
-        if (!jsonArray.isEmpty()) {
+    public boolean findPlayerName(String playerName) {
+        if (!jsonArray.isEmpty()) { //рекорды отсутствуют
             boolean nameFound = false;
             int playerId = 0;
-            for (int index = 0; index < jsonArray.length(); index++) {
+            for (int index = 0; index < jsonArray.length(); index++) { //цикл поиска имени данного игрока
                 if (jsonArray.getJSONObject(index).getInt("player_id") > playerId) {
-                    playerId = jsonArray.getJSONObject(index).getInt("player_id");
+                    playerId = jsonArray.getJSONObject(index).getInt("player_id"); //формируется уникальный ID игрока в случае, если такое имя не найдется в массиве рекордов
                 }
-                if (jsonArray.getJSONObject(index).getString("name").equals(playerName)) {
-                    if (Integer.parseInt(String.valueOf(jsonArray.getJSONObject(index).getString("mode").charAt(0))) == settings.getNumOfPlayers()) {
-                        if (jsonArray.getJSONObject(index).get("map").toString().charAt(jsonArray.getJSONObject(index).getString("map").length() - 1) == settings.getMapPathname().charAt(settings.getMapPathname().length() - 5)) {
-                            if (Integer.parseInt(String.valueOf(jsonArray.getJSONObject(index).getString("speed").charAt(1))) == settings.getSpeed()) {
-                                if (jsonArray.getJSONObject(index).getInt("result") < result) {
+                if (jsonArray.getJSONObject(index).getString("name").equals(playerName)) { //имя совпало с именем одного из рекордов
+                    if (Integer.parseInt(String.valueOf(jsonArray.getJSONObject(index).getString("mode").charAt(0))) == settings.getNumOfPlayers()) { //текущий режим игры совпал с режимом в найденном рекорде
+                        if (jsonArray.getJSONObject(index).get("map").toString().charAt(jsonArray.getJSONObject(index).getString("map").length() - 1) == settings.getMapPathname().charAt(settings.getMapPathname().length() - 5)) { //текущая карта игры совпала с картой в найденном рекорде
+                            if (Integer.parseInt(String.valueOf(jsonArray.getJSONObject(index).getString("speed").charAt(1))) == settings.getSpeed()) { //совпали скорости
+                                if (jsonArray.getJSONObject(index).getInt("result") < result) { //если текущий результат больше найденного, то он заменяет результат найденного рекорда
                                     jsonArray.getJSONObject(index).put("result", result);
                                     JSONObject jsonObject = new JSONObject();
                                     jsonObject.put("records", jsonArray);
-                                    writeResult(jsonObject);
+                                    return writeResult(jsonObject);
                                 }
-                            } else {
-                                writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
+                            } else { //если одно из полей рекорда не совпадает с соответствующим значением для данного игрока, то это считается новым рекордом (ID игрока сохраняется)
+                                return writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
                                         jsonArray.getJSONObject(index).getString("mode"),
                                         jsonArray.getJSONObject(index).getString("map"),
                                         "x" + settings.getSpeed(),
                                         playerName);
                             }
                         } else {
-                            writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
+                            return writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
                                     jsonArray.getJSONObject(index).getString("mode"),
                                     "map " + settings.getMapPathname().charAt(settings.getMapPathname().length() - 5),
                                     "x" + settings.getSpeed(),
@@ -172,13 +172,13 @@ public class Records {
                         }
                     } else {
                         if (settings.getNumOfPlayers() == 1) {
-                            writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
+                            return writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
                                     settings.getNumOfPlayers() + " player",
                                     "map " + settings.getMapPathname().charAt(settings.getMapPathname().length() - 5),
                                     "x" + settings.getSpeed(),
                                     playerName);
                         } else {
-                            writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
+                            return writeNewResult(jsonArray.getJSONObject(index).getInt("player_id"),
                                     settings.getNumOfPlayers() + " players",
                                     "map " + settings.getMapPathname().charAt(settings.getMapPathname().length() - 5),
                                     "x" + settings.getSpeed(),
@@ -189,15 +189,15 @@ public class Records {
                     break;
                 }
             }
-            if (!nameFound) {
+            if (!nameFound) { //если данное имя не найдено в массиве рекордов, то это новый рекорд
                 if (settings.getNumOfPlayers() == 1) {
-                    writeNewResult(playerId + 1,
+                    return writeNewResult(playerId + 1,
                             settings.getNumOfPlayers() + " player",
                             "map " + settings.getMapPathname().charAt(settings.getMapPathname().length() - 5),
                             "x" + settings.getSpeed(),
                             playerName);
                 } else {
-                    writeNewResult(playerId + 1,
+                    return writeNewResult(playerId + 1,
                             settings.getNumOfPlayers() + " players",
                             "map " + settings.getMapPathname().charAt(settings.getMapPathname().length() - 5),
                             "x" + settings.getSpeed(),
@@ -206,22 +206,24 @@ public class Records {
             }
         } else {
             if (settings.getNumOfPlayers() == 1) {
-                writeNewResult(1,
+                return writeNewResult(1,
                         settings.getNumOfPlayers() + " player",
                         "map " + settings.getMapPathname().charAt(settings.getMapPathname().length() - 5),
                         "x" + settings.getSpeed(),
                         playerName);
             } else {
-                writeNewResult(1,
+                return writeNewResult(1,
                         settings.getNumOfPlayers() + " players",
                         "map " + settings.getMapPathname().charAt(settings.getMapPathname().length() - 5),
                         "x" + settings.getSpeed(),
                         playerName);
             }
         }
+        return true;
     }
 
-    public void writeNewResult(int playerId, String mode, String map, String speed, String playerName) {
+    public boolean writeNewResult(int playerId, String mode, String map, String speed, String playerName) {
+        //в файл записывается новый рекорд
         SimpleDateFormat formaterDate = new SimpleDateFormat("dd.MM.yyyy");
         SimpleDateFormat formaterTime = new SimpleDateFormat("HH:mm:ss");
         Date date = new Date();
@@ -237,24 +239,30 @@ public class Records {
         jsonArray.put(newResult);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("records", jsonArray);
-        writeResult(jsonObject);
+        return writeResult(jsonObject);
     }
 
-    public void writeResult(JSONObject jsonObject) {
+    public boolean writeResult(JSONObject jsonObject) {
+        //в файл записывается рекорд
+        FileWriter fileWriter;
         try {
             fileWriter = new FileWriter(recordsFile.getAbsoluteFile());
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
         try {
             fileWriter.write(jsonObject.toString());
             fileWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     public void setRecordsEvents() {
+        //устанавливается обработчик событий на поле ввода имени игрока, если запущена игра
         EventHandler<KeyEvent> nameFieldEventHandler = keyEvent -> {
             if (keyEvent.getCode().equals(KeyCode.ENTER)) {
                 setPlayerName(nameField.getText());
@@ -266,6 +274,7 @@ public class Records {
     }
 
     public void setRecordsMenuEvents() {
+        //устанавливается обработчик событий на кнопку возврата в меню из пункта рекордов
         EventHandler<MouseEvent> returnToMenuButtonEventHandler = mouseEvent -> {
             menu.displayMenu();
             menu.setMenuEvents();
